@@ -33,16 +33,28 @@ Prometheus是一套开源的**自主无人机软件系统平台**，为无人机
 
 ## 硬件产品
 
- - 仿真必备遥控器：[点击购买](https://item.taobao.com/item.htm?spm=a1z10.5-c-s.w4002-22617251051.13.2ffa3e75uvfxuB&id=612837659406)
+- **仿真必备遥控器**
 
- - **Prometheus二次开发平台：**   [Prometheus 450第三代正式发布](https://mp.weixin.qq.com/s/LdtmLQ2eYUwg-pRklMXL8w)！
-    - 丰富的文档资料，详情[请戳这里](https://wiki.amovlab.com/public/prometheuswiki/) 。
-    - 售后服务与技术指导。
-    - 免费赠送 成都线下工程实训课程 及 Promehteus自主无人机二次开发课程购买折扣。
- 
- - 其他配套硬件：机架、机载电脑、双目、激光雷达等无人机二次开发硬件请关注 [阿木实验室淘宝店](https://shop142114972.taobao.com/?spm=a230r.7195193.1997079397.2.67d03d8dJQgFRW)　或　[阿木实验室京东旗舰店](https://mall.jd.com/index-10260560.html?from=pc)。
- 
+  [点击购买](https://item.taobao.com/item.htm?spm=a1z10.5-c-s.w4002-22617251051.13.2ffa3e75uvfxuB&id=612837659406)
 
+- **Prometheus二次开发无人机平台**   
+
+  - 整机产品：[Prometheus  230](https://mp.weixin.qq.com/s/Tc1VPPGdA3-rw1glKwjIRg)、[Prometheus 450](https://mp.weixin.qq.com/s/LdtmLQ2eYUwg-pRklMXL8w)、[Prometheus  600](https://mp.weixin.qq.com/s/LgHU2E34d37wiX2jcgSPPA)
+  - 丰富的文档资料，详情[请戳这里](https://wiki.amovlab.com/public/prometheuswiki/) 。
+  - 售后服务与技术指导。
+  - 免费赠送 成都线下工程实训课程 及 Promehteus自主无人机二次开发课程购买折扣。
+
+- **Prometheus二次开发配套硬件**   
+
+  - 关键配件：[Allspark微型边缘计算机](https://mp.weixin.qq.com/s/EF7wRWPuazYwUlXaUr2g_Q)、[超小型G1吊舱](https://mp.weixin.qq.com/s/ddtYEVJkY8TpH47NjUxKXQ)
+
+  - 通讯配件：[minihomer](https://mp.weixin.qq.com/s/7sasXY_8S1DqYsrgs0U5NA)、[自组网homer](https://mp.weixin.qq.com/s/5ap0EeeWdk4IcDGNv1IaZw)、
+
+  - 其他配件：[Nora+飞控](https://item.taobao.com/item.htm?spm=a1z10.5-c-s.w4002-22617251051.24.73186f33qJobSF&id=676347508327)
+
+  - 其他配套硬件：机架、机载电脑、双目、激光雷达等无人机二次开发配套硬件
+
+    请关注 [阿木实验室淘宝店](https://shop142114972.taobao.com/?spm=a230r.7195193.1997079397.2.67d03d8dJQgFRW)　或　[阿木实验室京东旗舰店](https://mall.jd.com/index-10260560.html?from=pc)。
 
 ## Prometheus校园赞助计划
  - 奖励使用Prometheus进行实验并发表相关论文的学生科研工作者。
