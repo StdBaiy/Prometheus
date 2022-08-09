@@ -39,7 +39,7 @@ Prometheus是一套开源的**自主无人机软件系统平台**，为无人机
 
 - **Prometheus二次开发无人机平台**   
 
-  - 整机产品：[Prometheus  230](https://mp.weixin.qq.com/s/Tc1VPPGdA3-rw1glKwjIRg)、[Prometheus 450](https://mp.weixin.qq.com/s/LdtmLQ2eYUwg-pRklMXL8w)、[Prometheus  600](https://mp.weixin.qq.com/s/LgHU2E34d37wiX2jcgSPPA)
+  - 整机平台：[Prometheus  230](https://mp.weixin.qq.com/s/Tc1VPPGdA3-rw1glKwjIRg)、[Prometheus 450](https://mp.weixin.qq.com/s/LdtmLQ2eYUwg-pRklMXL8w)、[Prometheus  600](https://mp.weixin.qq.com/s/LgHU2E34d37wiX2jcgSPPA)
   - 丰富的文档资料，详情[请戳这里](https://wiki.amovlab.com/public/prometheuswiki/) 。
   - 售后服务与技术指导。
   - 免费赠送 成都线下工程实训课程 及 Promehteus自主无人机二次开发课程购买折扣。
