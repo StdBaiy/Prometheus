@@ -111,7 +111,7 @@ int main(int argc, char **argv)
         cap.open(pipeline, cv::CAP_GSTREAMER);
     } else if (camera_type == 2) {
         cap.open(camera_id, cv::CAP_V4L2);
-        cap.set(CAP_PROP_FOURCC, CV_FOURCC('G', 'R', 'E', 'Y'));
+        cap.set(CAP_PROP_FOURCC, VideoWriter::fourcc('G', 'R', 'E', 'Y'));
         cap.set(CAP_PROP_CONVERT_RGB, 0);
     } else {
         cap.open(camera_id);

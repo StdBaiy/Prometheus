@@ -72,6 +72,7 @@ rate = rospy.Rate(100)
 ip = '127.0.0.1'
 port = 9091
 
+# socket不断从Yolo服务器接受识别的结果
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 while True:
     try:
@@ -90,6 +91,7 @@ aos_x = math.atan(image_width / 2. / camera_matrix[0][0])  # angle of sight
 aos_y = math.atan(image_height / 2. / camera_matrix[1][1])
 
 while not rospy.is_shutdown():
+    # data就是服务器返回的字符串，缓冲区大小为62B
     data = s.recv(62)  # 35
     data = data.decode('utf-8')
 
@@ -97,6 +99,7 @@ while not rospy.is_shutdown():
     if len(data) > 0:
         nums = data.split(',')
         if len(nums) == 12:
+            # 按照服务器的发送格式还原各个数据
             frame_id = int(nums[0])
             deted = int(nums[1])
             order = int(nums[2])
@@ -107,6 +110,7 @@ while not rospy.is_shutdown():
             pixel_cy = int(nums[10])
             detect_track = int(nums[11])  # 0:detect, 1:track
             m_info.detect_or_track = detect_track
+            # 如果检测到
             if deted >= 1:
                 d_info = DetectionInfo()
                 d_info.detected = True
@@ -164,4 +168,3 @@ while not rospy.is_shutdown():
             last_fid = frame_id
 
     rate.sleep()
-

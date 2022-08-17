@@ -14,7 +14,7 @@ message("Darknet path dir = ${DARKNET_PATH}")
 add_definitions(-DDARKNET_FILE_PATH="${DARKNET_PATH}")
 
 # Find CUDA
-FIND_PACKAGE(CUDA)
+find_package(CUDA QUIET)
 if (CUDA_FOUND)
   find_package(CUDA REQUIRED)
   message(STATUS "CUDA Version: ${CUDA_VERSION_STRINGS}")
@@ -56,6 +56,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp_serialization
     sensor_msgs
     image_transport
+    nodelet
     cv_bridge
     actionlib
     prometheus_msgs
@@ -156,8 +157,22 @@ add_definitions(-O4 -g)
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+
+# catkin_package(
+#    CATKIN_DEPENDS message_runtime std_msgs
+# )
 catkin_package(
-   CATKIN_DEPENDS message_runtime std_msgs
+  CATKIN_DEPENDS
+    cv_bridge
+    roscpp
+    actionlib
+    rospy
+    std_msgs
+    prometheus_msgs
+    image_transport
+    nodelet
+  DEPENDS
+    Boost
 )
 
 ###########
@@ -168,7 +183,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
   src/kcf_tracker_lib
-  src/ellipse_lib
+  # src/ellipse_lib
   src/darknet_lib/src
   src/darknet_lib/include
   src/darknet_ros/include
@@ -179,6 +194,54 @@ include_directories(
   ../common/include
 )
 
+set(PROJECT_LIB_FILES
+    src/darknet_ros/src/YoloObjectDetector.cpp                    src/darknet_ros/src/image_interface.cpp
+)
+
+set(DARKNET_CORE_FILES
+    ${DARKNET_PATH}/src/activation_layer.c        ${DARKNET_PATH}/src/im2col.c
+    ${DARKNET_PATH}/src/activations.c             ${DARKNET_PATH}/src/image.c
+    ${DARKNET_PATH}/src/avgpool_layer.c           ${DARKNET_PATH}/src/layer.c
+    ${DARKNET_PATH}/src/batchnorm_layer.c         ${DARKNET_PATH}/src/list.c
+    ${DARKNET_PATH}/src/blas.c                    ${DARKNET_PATH}/src/local_layer.c
+    ${DARKNET_PATH}/src/box.c                     ${DARKNET_PATH}/src/lstm_layer.c
+    ${DARKNET_PATH}/src/col2im.c                  ${DARKNET_PATH}/src/matrix.c
+    ${DARKNET_PATH}/src/connected_layer.c         ${DARKNET_PATH}/src/maxpool_layer.c
+    ${DARKNET_PATH}/src/convolutional_layer.c     ${DARKNET_PATH}/src/network.c
+    ${DARKNET_PATH}/src/cost_layer.c              ${DARKNET_PATH}/src/normalization_layer.c
+    ${DARKNET_PATH}/src/crnn_layer.c              ${DARKNET_PATH}/src/option_list.c
+    ${DARKNET_PATH}/src/crop_layer.c              ${DARKNET_PATH}/src/parser.c
+    ${DARKNET_PATH}/src/cuda.c                    ${DARKNET_PATH}/src/region_layer.c
+    ${DARKNET_PATH}/src/data.c                    ${DARKNET_PATH}/src/reorg_layer.c
+    ${DARKNET_PATH}/src/deconvolutional_layer.c   ${DARKNET_PATH}/src/rnn_layer.c
+    ${DARKNET_PATH}/src/demo.c                    ${DARKNET_PATH}/src/route_layer.c
+    ${DARKNET_PATH}/src/detection_layer.c         ${DARKNET_PATH}/src/shortcut_layer.c
+    ${DARKNET_PATH}/src/dropout_layer.c           ${DARKNET_PATH}/src/softmax_layer.c
+    ${DARKNET_PATH}/src/gemm.c                    ${DARKNET_PATH}/src/tree.c
+    ${DARKNET_PATH}/src/gru_layer.c               ${DARKNET_PATH}/src/utils.c
+    ${DARKNET_PATH}/src/upsample_layer.c          ${DARKNET_PATH}/src/logistic_layer.c
+    ${DARKNET_PATH}/src/l2norm_layer.c            ${DARKNET_PATH}/src/yolo_layer.c
+    ${DARKNET_PATH}/src/iseg_layer.c              ${DARKNET_PATH}/src/image_opencv.cpp
+
+    ${DARKNET_PATH}/examples/art.c                ${DARKNET_PATH}/examples/lsd.c
+    ${DARKNET_PATH}/examples/nightmare.c          ${DARKNET_PATH}/examples/instance-segmenter.c
+    ${DARKNET_PATH}/examples/captcha.c            ${DARKNET_PATH}/examples/regressor.c
+    ${DARKNET_PATH}/examples/cifar.c              ${DARKNET_PATH}/examples/rnn.c
+    ${DARKNET_PATH}/examples/classifier.c         ${DARKNET_PATH}/examples/segmenter.c
+    ${DARKNET_PATH}/examples/coco.c               ${DARKNET_PATH}/examples/super.c
+    ${DARKNET_PATH}/examples/darknet.c            ${DARKNET_PATH}/examples/tag.c
+    ${DARKNET_PATH}/examples/detector.c           ${DARKNET_PATH}/examples/yolo.c
+    ${DARKNET_PATH}/examples/go.c
+)
+
+set(DARKNET_CUDA_FILES
+    ${DARKNET_PATH}/src/activation_kernels.cu     ${DARKNET_PATH}/src/crop_layer_kernels.cu
+    ${DARKNET_PATH}/src/avgpool_layer_kernels.cu  ${DARKNET_PATH}/src/deconvolutional_kernels.cu
+    ${DARKNET_PATH}/src/blas_kernels.cu           ${DARKNET_PATH}/src/dropout_layer_kernels.cu
+    ${DARKNET_PATH}/src/col2im_kernels.cu         ${DARKNET_PATH}/src/im2col_kernels.cu
+    ${DARKNET_PATH}/src/convolutional_kernels.cu  ${DARKNET_PATH}/src/maxpool_layer_kernels.cu
+)
+
 
 if (CUDA_FOUND)
 
@@ -187,108 +250,42 @@ if (CUDA_FOUND)
   )
 
   cuda_add_library(darknet_ros_lib
-    src/darknet_ros/src/YoloObjectDetector.cpp
-    src/darknet_ros/src/image_interface.c
-
-    src/darknet_lib/src/activation_layer.c        src/darknet_lib/src/im2col.c
-    src/darknet_lib/src/activations.c             src/darknet_lib/src/image.c
-    src/darknet_lib/src/avgpool_layer.c           src/darknet_lib/src/layer.c
-    src/darknet_lib/src/batchnorm_layer.c         src/darknet_lib/src/list.c
-    src/darknet_lib/src/blas.c                    src/darknet_lib/src/local_layer.c
-    src/darknet_lib/src/box.c                     src/darknet_lib/src/lstm_layer.c
-    src/darknet_lib/src/col2im.c                  src/darknet_lib/src/matrix.c
-    src/darknet_lib/src/connected_layer.c         src/darknet_lib/src/maxpool_layer.c
-    src/darknet_lib/src/convolutional_layer.c     src/darknet_lib/src/network.c
-    src/darknet_lib/src/cost_layer.c              src/darknet_lib/src/normalization_layer.c
-    src/darknet_lib/src/crnn_layer.c              src/darknet_lib/src/option_list.c
-    src/darknet_lib/src/crop_layer.c              src/darknet_lib/src/parser.c
-    src/darknet_lib/src/cuda.c                    src/darknet_lib/src/region_layer.c
-    src/darknet_lib/src/data.c                    src/darknet_lib/src/reorg_layer.c
-    src/darknet_lib/src/deconvolutional_layer.c   src/darknet_lib/src/rnn_layer.c
-    src/darknet_lib/src/demo.c                    src/darknet_lib/src/route_layer.c
-    src/darknet_lib/src/detection_layer.c         src/darknet_lib/src/shortcut_layer.c
-    src/darknet_lib/src/dropout_layer.c           src/darknet_lib/src/softmax_layer.c
-    src/darknet_lib/src/gemm.c                    src/darknet_lib/src/tree.c
-    src/darknet_lib/src/gru_layer.c               src/darknet_lib/src/utils.c
-    src/darknet_lib/src/upsample_layer.c          src/darknet_lib/src/logistic_layer.c
-    src/darknet_lib/src/l2norm_layer.c            src/darknet_lib/src/yolo_layer.c
-
-    src/darknet_lib/examples/art.c                src/darknet_lib/examples/lsd.c
-    src/darknet_lib/examples/attention.c          src/darknet_lib/examples/nightmare.c
-    src/darknet_lib/examples/captcha.c            src/darknet_lib/examples/regressor.c
-    src/darknet_lib/examples/cifar.c              src/darknet_lib/examples/rnn.c
-    src/darknet_lib/examples/classifier.c         src/darknet_lib/examples/segmenter.c
-    src/darknet_lib/examples/coco.c               src/darknet_lib/examples/super.c
-    src/darknet_lib/examples/darknet.c            src/darknet_lib/examples/tag.c
-    src/darknet_lib/examples/detector.c           src/darknet_lib/examples/yolo.c
-    src/darknet_lib/examples/go.c
-
-    src/darknet_lib/src/activation_kernels.cu     src/darknet_lib/src/crop_layer_kernels.cu
-    src/darknet_lib/src/avgpool_layer_kernels.cu  src/darknet_lib/src/deconvolutional_kernels.cu
-    src/darknet_lib/src/blas_kernels.cu           src/darknet_lib/src/dropout_layer_kernels.cu
-    src/darknet_lib/src/col2im_kernels.cu         src/darknet_lib/src/im2col_kernels.cu
-    src/darknet_lib/src/convolutional_kernels.cu  src/darknet_lib/src/maxpool_layer_kernels.cu
+    ${PROJECT_LIB_FILES} ${DARKNET_CORE_FILES}
+    ${DARKNET_CUDA_FILES}
   )
 
   target_link_libraries(darknet_ros_lib
-    m
-    pthread
-    stdc++
     cuda
     cudart
     cublas
     curand
-    ${Boost_LIBRARIES}
-    ${OpenCV_LIBRARIES}
-    ${catkin_LIBRARIES}
-    ${OpenCV_LIBS}
   )
 
   cuda_add_executable(darknet_ros
     src/darknet_ros/src/yolo_object_detector_node.cpp
   )
 
+  cuda_add_library(darknet_ros_nodelet
+    src/darknet_ros/src/yolo_object_detector_nodelet.cpp
+  )
+
 else()
 
   add_library(darknet_ros_lib
-    src/darknet_ros/src/YoloObjectDetector.cpp
-    src/darknet_ros/src/image_interface.c
-
-    src/darknet_lib/src/activation_layer.c        src/darknet_lib/src/im2col.c
-    src/darknet_lib/src/activations.c             src/darknet_lib/src/image.c
-    src/darknet_lib/src/avgpool_layer.c           src/darknet_lib/src/layer.c
-    src/darknet_lib/src/batchnorm_layer.c         src/darknet_lib/src/list.c
-    src/darknet_lib/src/blas.c                    src/darknet_lib/src/local_layer.c
-    src/darknet_lib/src/box.c                     src/darknet_lib/src/lstm_layer.c
-    src/darknet_lib/src/col2im.c                  src/darknet_lib/src/matrix.c
-    src/darknet_lib/src/connected_layer.c         src/darknet_lib/src/maxpool_layer.c
-    src/darknet_lib/src/convolutional_layer.c     src/darknet_lib/src/network.c
-    src/darknet_lib/src/cost_layer.c              src/darknet_lib/src/normalization_layer.c
-    src/darknet_lib/src/crnn_layer.c              src/darknet_lib/src/option_list.c
-    src/darknet_lib/src/crop_layer.c              src/darknet_lib/src/parser.c
-    src/darknet_lib/src/cuda.c                    src/darknet_lib/src/region_layer.c
-    src/darknet_lib/src/data.c                    src/darknet_lib/src/reorg_layer.c
-    src/darknet_lib/src/deconvolutional_layer.c   src/darknet_lib/src/rnn_layer.c
-    src/darknet_lib/src/demo.c                    src/darknet_lib/src/route_layer.c
-    src/darknet_lib/src/detection_layer.c         src/darknet_lib/src/shortcut_layer.c
-    src/darknet_lib/src/dropout_layer.c           src/darknet_lib/src/softmax_layer.c
-    src/darknet_lib/src/gemm.c                    src/darknet_lib/src/tree.c
-    src/darknet_lib/src/gru_layer.c               src/darknet_lib/src/utils.c
-    src/darknet_lib/src/upsample_layer.c          src/darknet_lib/src/logistic_layer.c
-    src/darknet_lib/src/l2norm_layer.c            src/darknet_lib/src/yolo_layer.c
-
-    src/darknet_lib/examples/art.c                src/darknet_lib/examples/lsd.c
-    src/darknet_lib/examples/attention.c          src/darknet_lib/examples/nightmare.c
-    src/darknet_lib/examples/captcha.c            src/darknet_lib/examples/regressor.c
-    src/darknet_lib/examples/cifar.c              src/darknet_lib/examples/rnn.c
-    src/darknet_lib/examples/classifier.c         src/darknet_lib/examples/segmenter.c
-    src/darknet_lib/examples/coco.c               src/darknet_lib/examples/super.c
-    src/darknet_lib/examples/darknet.c            src/darknet_lib/examples/tag.c
-    src/darknet_lib/examples/detector.c           src/darknet_lib/examples/yolo.c
-    src/darknet_lib/examples/go.c
+  ${PROJECT_LIB_FILES} ${DARKNET_CORE_FILES}
   )
 
-  target_link_libraries(darknet_ros_lib
+  add_executable(darknet_ros
+    src/darknet_ros/src/yolo_object_detector_node.cpp
+  )
+
+  add_library(darknet_ros_nodelet
+  src/yolo_object_detector_nodelet.cpp
+  )
+
+endif()
+
+target_link_libraries(darknet_ros_lib
     m
     pthread
     stdc++
@@ -296,20 +293,38 @@ else()
     ${OpenCV_LIBRARIES}
     ${catkin_LIBRARIES}
     ${OpenCV_LIBS}
-  )
-
-  add_executable(darknet_ros
-    src/darknet_ros/src/yolo_object_detector_node.cpp
-  )
-
-endif()
+)
 
 target_link_libraries(darknet_ros
   darknet_ros_lib
 )
 
+target_link_libraries(darknet_ros_nodelet
+  darknet_ros_lib
+)
+
 add_dependencies(darknet_ros_lib
   darknet_ros_msgs_generate_messages_cpp
+)
+
+install(TARGETS darknet_ros_lib
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(TARGETS darknet_ros
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(
+  DIRECTORY include/darknet_ros/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+)
+
+install(DIRECTORY config launch yolo_network_config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 ## Declare a C++ library
@@ -363,15 +378,15 @@ add_executable(markers_landpad_det
 )
 target_link_libraries(markers_landpad_det ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
 
-add_executable(ellipse_det
-    cpp_nodes/ellipse_det.cpp
-    src/ellipse_detector/ellipse_detector.cpp
-    src/ellipse_detector/ellipse_detector.h
-)
-target_include_directories(ellipse_det PUBLIC
-    src/ellipse_detector/
-)
-target_link_libraries(ellipse_det ${catkin_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
+# add_executable(ellipse_det
+#     cpp_nodes/ellipse_det.cpp
+#     src/ellipse_detector/ellipse_detector.cpp
+#     src/ellipse_detector/ellipse_detector.h
+# )
+# target_include_directories(ellipse_det PUBLIC
+#     src/ellipse_detector/
+# )
+# target_link_libraries(ellipse_det ${catkin_LIBRARIES} ${OpenCV_LIBS} yaml-cpp)
 
 
 if(CATKIN_ENABLE_TESTING)
@@ -400,3 +415,17 @@ if(CATKIN_ENABLE_TESTING)
     execute_process(COMMAND wget http://jario.ren/upload/SiamRPNVOT.model -P ${PATH})
   endif()
 endif()
+
+#########################
+###   CLANG TOOLING   ###
+#########################
+find_package(cmake_clang_tools QUIET)
+if (cmake_clang_tools_FOUND)
+  message(STATUS "Run clang tooling")
+  add_clang_tooling(
+    TARGETS ${PROJECT_NAME}
+    SOURCE_DIRS ${CMAKE_CURRENT_LIST_DIR}/src ${CMAKE_CURRENT_LIST_DIR}/include ${CMAKE_CURRENT_LIST_DIR}/test
+    CT_HEADER_DIRS ${CMAKE_CURRENT_LIST_DIR}/include
+    CF_WERROR
+  )
+endif (cmake_clang_tools_FOUND)

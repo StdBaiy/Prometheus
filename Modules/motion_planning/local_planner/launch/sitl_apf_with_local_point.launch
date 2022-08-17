@@ -5,7 +5,7 @@
         <param name="uav_id" value="1"/>
         <param name="local_planner/sim_mode" value="true"/>
         <!-- 局部避障算法: 0为APF,1为VFH -->
-        <param name="local_planner/algorithm_mode" value="0"/>
+        <param name="local_planner/algorithm_mode" value="2"/>
         <!-- 地图输入模式 0代表全局点云，1代表局部点云，2代表激光雷达scan数据 -->
         <param name="local_planner/map_input_source" value="0"/>
         <param name="local_planner/local_pcl_topic_name" value="/map_generator/local_cloud"/>
@@ -33,4 +33,3 @@
 		<param name="apf/safe_distance" value="0.01" type="double"/>
     </node>
 </launch>
-

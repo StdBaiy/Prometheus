@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(prometheus_msgs)
 
+# set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+
 find_package(catkin REQUIRED COMPONENTS
   message_generation  
   roscpp
@@ -34,6 +36,7 @@ add_message_files(
   MultiDetectionInfo.msg
   BoundingBox.msg
   BoundingBoxes.msg
+  ObjectCount.msg
 
   SwarmCommand.msg
   FormationAssign.msg
@@ -55,7 +58,7 @@ add_message_files(
 add_action_files(
   DIRECTORY action
   FILES
-  CheckForObjects.action
+    CheckForObjects.action
 )
 
 generate_messages(
