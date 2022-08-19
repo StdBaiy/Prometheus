@@ -6,6 +6,18 @@
 
 **Prometheus**是希腊神话中最具智慧的神明之一，希望本项目能为无人机研发带来无限的智慧与光明。
 
+## 修改说明
+- 本项目已经经过编译，如果需要移植，需要先用原始的Prometheus项目进行编译，然后把/Prometheus文件夹换成本文件夹
+- 本机环境：
+  - Ubuntu20.04
+  - OpenCV4.3.0（在object_detection的CMakeLists.txt中手动指定了OpenCV的路径）
+  - NVIDIA-SMI 515.65.01    Driver Version: 515.65.01    CUDA Version: 11.7
+  - 目标检测模块需要conda对应的python环境，具体见[Prometheus使用手册](https://wiki.amovlab.com/public/prometheus-wiki/)
+- YoloV5部分是个内嵌的git仓库，为了方便我把它变成了普通文件夹
+- 我把原始项目的darknet_ros部分换成了github上原作者的项目，同时修改了CMakeLists.txt
+- 部分需要用到旧版本OpenCV的模块被我注释了，比如椭圆检测部分，实际不影响其他demo运行
+
+
 ## 项目总览
 
 Prometheus是一套开源的**自主无人机软件系统平台**，为无人机的智能与自主飞行提供**全套解决方案**。本项目基于[PX4开源飞控固件](https://docs.px4.io/main/zh/index.html)和[ROS机器人操作系统](https://wiki.ros.org/)，旨在为无人机开发者配套成熟可用的**机载电脑端**软件系统，提供更加简洁快速的开发体验。目前已集成**控制**、**规划**及**目标检测**等研究方向，提供多个功能demo，并配套有Amovlab仿真组件。

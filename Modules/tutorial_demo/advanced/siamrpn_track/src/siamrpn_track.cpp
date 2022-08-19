@@ -40,14 +40,18 @@ void vision_cb(const prometheus_msgs::DetectionInfo::ConstPtr &msg)
 {
     g_Detection_raw = *msg;
 
+    // 目标相对相机的位置+相机偏移，得到目标相对无人机的位置
+    // g_Detection_raw.position的顺序是zyx，因此要错位相加
     pos_body_frame[0] = g_Detection_raw.position[2] + camera_offset[0];
     pos_body_frame[1] = -g_Detection_raw.position[0] + camera_offset[1];
     pos_body_frame[2] = -g_Detection_raw.position[1] + camera_offset[2];
 
     Eigen::Matrix3f R_Body_to_ENU;
 
+    // 获取无人机俯仰角和朝向，计算旋转矩阵
     R_Body_to_ENU = get_rotation_matrix(g_UAVState.attitude[0], g_UAVState.attitude[1], g_UAVState.attitude[2]);
 
+    // 两个矩阵相乘，得到什么？
     pos_body_enu_frame = R_Body_to_ENU * pos_body_frame;
 
     if (g_Detection_raw.detected)
@@ -154,6 +158,7 @@ int main(int argc, char **argv)
             g_command_now.Move_mode = prometheus_msgs::UAVCommand::XYZ_VEL; // xy velocity z position
 
             // 根据误差计算计算应该给于无人机的速度
+            // 这一步没看懂
             g_command_now.velocity_ref[0] = kpx_track * (pos_body_enu_frame[0] - tracking_delta[0]);
             g_command_now.velocity_ref[1] = kpy_track * (pos_body_enu_frame[1] - tracking_delta[1]);
             g_command_now.velocity_ref[2] = kpz_track * (tracking_delta[2] - g_UAVState.position[2]);

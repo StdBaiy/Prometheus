@@ -140,20 +140,29 @@ while not rospy.is_shutdown():
                                 deted = int(nums[1])
                                 order = int(nums[2])
                                 cls = int(nums[3])
+                                # 检测框的xywh
                                 xmin, ymin, w, h = float(nums[4]), float(nums[5]), float(nums[6]), float(nums[7])
+                                # 概率
                                 score = float(nums[8])
+                                # 中心点x坐标
                                 pixel_cx = int(nums[9])
+                                # 中心点y坐标
                                 pixel_cy = int(nums[10])
                                 detect_track = int(nums[11])  # 0:detect, 1:track
                                 assert order == i, "server error"
                                 d_info = DetectionInfo()
                                 d_info.detected = True
                                 d_info.frame = frame_id
+                                # 类名
                                 d_info.object_name = cls_names[cls]
+                                # 类号
                                 d_info.category = cls
+                                # 相继视角
                                 d_info.sight_angle = [(xmin+w/2.-0.5)*aos_x, (ymin+h/2.-0.5)*aos_y]
+                                # 中心点坐标
                                 d_info.pixel_position = [pixel_cx, pixel_cy]
-                
+                                # 自此处计算检测到的目标的位置
+                                # position是相对相机的位置，注意在demo里相机和无人机朝向总是一致
                                 if cls_hs[cls] > 0:
                                     depth = (cls_hs[cls]*camera_matrix[1][1]) / (h*image_height)
                                     d_info.position = [math.tan(d_info.sight_angle[0])*depth, math.tan(d_info.sight_angle[1])*depth, depth]
