@@ -142,13 +142,13 @@
         <pose>0.0 0.0 0.0 0 0 0</pose>
       </include>
     </model>
-
+<!-- 
     <model name='fake_p230_1'>
       <include>
         <uri>model://fake_p230_1</uri>
         <pose>0.0 0.0 0.0 0 0 0</pose>
       </include>
-    </model>
+    </model> -->
 
     </world>
 </sdf>

@@ -15,7 +15,13 @@
 	<arg name="uav_id" default="1"/>
 	<!-- 无人机仿真模型及对应SDF文件路径 -->
 	<arg name="model" default="p230"/>
-	<arg name="sdf" default="$(find prometheus_gazebo)/gazebo_models/uav_models/p230/p230.sdf"/>
+	<!-- <arg name="sdf" default="$(find prometheus_gazebo)/gazebo_models/uav_models/p230/p230.sdf"/> -->
+	<!-- <arg name="sdf" default="$(find prometheus_gazebo)/gazebo_models/uav_models/p450/p450.sdf"/> -->
+	<!-- <arg name="sdf" default="$(find prometheus_gazebo)/gazebo_models/uav_models/p450_monocular/p450_monocular.sdf"/> -->
+	<arg name="sdf" default="/home/abclab/Prometheus/merge_yolo_and_egoplan/p450_odom_cam.sdf"/>
+	<!-- <arg name="sdf" default="/home/abclab/Prometheus/merge_yolo_and_egoplan/test.sdf"/> -->
+
+
 	<!-- 无人机初始位置及偏航角 -->
 	<arg name="uav_init_x" default="0.0"/>
     <arg name="uav_init_y" default="0.0"/>

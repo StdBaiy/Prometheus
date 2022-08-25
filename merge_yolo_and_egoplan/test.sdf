@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<sdf version='1.6'>
+<!--模型名字-->
+  <model name='p450_monocular'>
+  <!--include标签，包含URI编写的资源，可用于嵌套模型-->
+    <include>
+      <uri>model://p450</uri> <!--uri编写的p450飞机-->
+    </include>
+    
+  </model>
+</sdf>

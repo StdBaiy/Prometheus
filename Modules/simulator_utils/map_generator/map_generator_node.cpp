@@ -9,7 +9,7 @@ int main(int argc, char **argv)
 
     string map_name;
     // 【参数】地图名称
-    nh.param<string>("map_name", map_name, "planning_test");
+    nh.param<string>("map_name", map_name, "planning_test2");
     cout << GREEN << "map_name:  [ " << map_name << " ]" << TAIL << endl;
 
     // 初始化地图生成器
