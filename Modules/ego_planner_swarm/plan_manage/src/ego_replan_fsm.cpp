@@ -1,4 +1,3 @@
-
 #include <plan_manage/ego_replan_fsm.h>
 
 namespace ego_planner
@@ -71,15 +70,18 @@ namespace ego_planner
     bspline_pub_ = nh.advertise<traj_utils::Bspline>("planning/bspline", 10);
     data_disp_pub_ = nh.advertise<traj_utils::DataDisp>("planning/data_display", 100);
 
+    //手动模式，等待输入
     if (target_type_ == TARGET_TYPE::MANUAL_TARGET)
     {
       string waypoint_topic_name = string("/uav") + std::to_string(planner_manager_->pp_.drone_id) + string("/prometheus/motion_planning/goal");
       waypoint_sub_ = nh.subscribe(waypoint_topic_name.c_str(), 1, &EGOReplanFSM::waypointCallback, this);
     }
+    //预设目标
     else if (target_type_ == TARGET_TYPE::PRESET_TARGET)
     {
       trigger_sub_ = nh.subscribe("/uav" + std::to_string(planner_manager_->pp_.drone_id) + "/traj_start_trigger", 1, &EGOReplanFSM::triggerCallback, this);
 
+      //为何要等待1s？
       ROS_INFO("Wait for 1 second.");
       int count = 0;
       while (ros::ok() && count++ < 1000)
@@ -196,8 +198,9 @@ namespace ego_planner
       return;
     }
 
-    callEmergencyStop(odom_pos_);
-    sleep(2.0);
+    /*************此处的两个指令是在收到新goal之后急停并且休眠2s，给规划留下时间****************/
+    // callEmergencyStop(odom_pos_);
+    // sleep(2.0);
 
     cout << "EGO: Get goal!" << endl;
     init_pt_ = odom_pos_;
