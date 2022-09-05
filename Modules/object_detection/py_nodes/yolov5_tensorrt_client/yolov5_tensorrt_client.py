@@ -8,7 +8,7 @@ import cv2
 import time
 from geometry_msgs.msg import Pose, Point, Quaternion
 from std_msgs.msg import Float32MultiArray
-from prometheus_msgs.msg import DetectionInfo, MultiDetectionInfo
+from prometheus_msgs.msg import DetectionInfo, MultiDetectionInfo, YawRateInfo
 
 
 rospy.init_node('yolov5_openvino_client', anonymous=True)
@@ -53,8 +53,9 @@ def load_class_desc(dataset='coco'):
 
 pub_topic_name = rospy.get_param('~output_topic', '/prometheus/object_detection/yolov5_openvino_det')
 track_pub_topic_name = rospy.get_param('~pub_track_topic', '/prometheus/object_detection/siamrpn_tracker')
+yaw_rate_pub_topic_name = rospy.get_param('~yaw_rate_pub_topic', '/prometheus/object_detection/yaw_rate')
 object_names_txt = rospy.get_param('~object_names_txt', 'coco')
-config = rospy.get_param('~camera_parameters', '/home/onx/Code/Prometheus/Simulator/gazebo_simulator/config/camera_config/gimbal_camera.yaml')
+config = rospy.get_param('~camera_parameters', '/home/abclab/Prometheus/Simulator/gazebo_simulator/config/camera_config/gimbal_camera.yaml')
 uav_id = rospy.get_param('~uav_id', 1)
 cls_names, cls_ws, cls_hs = load_class_desc(object_names_txt)
 
@@ -67,6 +68,7 @@ fs.release()
 
 pub = rospy.Publisher("/uav" + str(uav_id) + pub_topic_name, MultiDetectionInfo, queue_size=1)
 track_pub = rospy.Publisher("/uav" + str(uav_id) + track_pub_topic_name, DetectionInfo, queue_size=1)
+yaw_rate_pub = rospy.Publisher("/uav" + str(uav_id) + yaw_rate_pub_topic_name, YawRateInfo, queue_size=1)
 rate = rospy.Rate(100)
 
 ip = '127.0.0.1'
@@ -95,10 +97,11 @@ while not rospy.is_shutdown():
     data = s.recv(62)  # 35
     data = data.decode('utf-8')
 
-
     if len(data) > 0:
         nums = data.split(',')
         if len(nums) == 12:
+            for x in nums:
+                print(x)
             # 按照服务器的发送格式还原各个数据
             frame_id = int(nums[0])
             deted = int(nums[1])
@@ -112,6 +115,7 @@ while not rospy.is_shutdown():
             m_info.detect_or_track = detect_track
             # 如果检测到
             if deted >= 1:
+                print('检测到了')
                 d_info = DetectionInfo()
                 d_info.detected = True
                 d_info.frame = frame_id
@@ -119,16 +123,27 @@ while not rospy.is_shutdown():
                 d_info.category = cls
                 d_info.sight_angle = [(xmin+w/2.-0.5)*aos_x, (ymin+h/2.-0.5)*aos_y]
                 d_info.pixel_position = [pixel_cx, pixel_cy]
-                
+
                 if cls_hs[cls] > 0:
                     depth = (cls_hs[cls]*camera_matrix[1][1]) / (h*image_height)
                     d_info.position = [math.tan(d_info.sight_angle[0])*depth, math.tan(d_info.sight_angle[1])*depth, depth]
-                
+
                 m_info.detection_infos.append(d_info)
                 m_info.num_objs += 1
 
                 if detect_track == 1:
+                    # 计算角速度(rad/s)
+                    yr_info = YawRateInfo()
+                    if abs(d_info.position[2]) < 1e-3:
+                        print('position2 = ',d_info.position[2])
+                    # 防止被除数过小而出错
+                        yr_info.yaw_rate = 0
+                    else:
+                        # 限制最大转向速度为π/3(rad/s)
+                        yr_info.yaw_rate = -min(math.atan(d_info.position[0]/d_info.position[2]), math.pi/3)
+
                     track_pub.publish(d_info)
+                    yaw_rate_pub.publish(yr_info)
                 for i in range(deted):
                     if i > 0:
                         data = s.recv(62)  # 35

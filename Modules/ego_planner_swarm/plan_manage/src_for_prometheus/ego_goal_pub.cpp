@@ -47,6 +47,7 @@ int main(int argc, char **argv)
     geometry_msgs::PoseStamped start_trigger;
     for (int i = 1; i <= swarm_num; i++)
     {
+        // 这里只赋了目标点的坐标，没有姿态角
         target_point.pose.position.x = target[i][0];
         target_point.pose.position.y = target[i][1];
         target_point.pose.position.z = target[i][2];

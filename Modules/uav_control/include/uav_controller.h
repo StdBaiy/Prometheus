@@ -172,6 +172,7 @@ private:
     void send_pos_setpoint(const Eigen::Vector3d &pos_sp, float yaw_sp);
     void send_vel_setpoint(const Eigen::Vector3d &vel_sp, float yaw_sp);
     void send_vel_setpoint_yaw_rate(const Eigen::Vector3d &vel_sp, float yaw_rate_sp);
+    void send_pos_vel_xyz_setpoint_and_yaw_rate(const Eigen::Vector3d &pos_sp, const Eigen::Vector3d &vel_sp, float yaw_rate);
     void send_vel_xy_pos_z_setpoint(const Eigen::Vector3d &pos_sp, const Eigen::Vector3d &vel_sp, float yaw_sp);
     void send_vel_xy_pos_z_setpoint_yaw_rate(const Eigen::Vector3d &pos_sp, const Eigen::Vector3d &vel_sp, float yaw_rate_sp);
     void send_pos_vel_xyz_setpoint(const Eigen::Vector3d &pos_sp, const Eigen::Vector3d &vel_sp, float yaw_sp);

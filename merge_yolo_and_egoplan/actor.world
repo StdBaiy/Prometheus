@@ -1,0 +1,131 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+    <world name="default">
+        <include>
+            <uri>model://ground_plane</uri>
+        </include>
+        <include>
+            <uri>model://sun</uri>
+        </include>
+
+        <!-- 障碍物 -->
+        <model name='cylinder1_a'>
+            <include>
+            <uri>model://obs_cylinder_small</uri>
+            <pose>2.0 -2.0 1.0 0 0 0</pose>
+            </include>
+        </model>
+    
+        <model name='cylinder1_b'>
+            <include>
+            <uri>model://obs_cylinder_small</uri>
+            <pose>2.0 0.0 1.0 0 0 0</pose>
+            </include>
+        </model>
+    
+        <model name='cylinder1_c'>
+            <include>
+            <uri>model://obs_cylinder_small</uri>
+            <pose>2.0 2.0 1.0 0 0 0</pose>
+            </include>
+        </model>
+    
+        <model name='cylinder1_d'>
+            <include>
+            <uri>model://obs_cylinder_small</uri>
+            <pose>6.0 -2.0 1.0 0 0 0</pose>
+            </include>
+        </model>
+    
+        <model name='cylinder1_e'>
+            <include>
+            <uri>model://obs_cylinder_small</uri>
+            <pose>6.0 -0.0 1.0 0 0 0</pose>
+            </include>
+        </model>
+    
+        <model name='cylinder1_f'>
+            <include>
+            <uri>model://obs_cylinder_small</uri>
+            <pose>6.0 2.0 1.0 0 0 0</pose>
+            </include>
+        </model>
+    
+        <model name='cylinder2_a'>
+            <include>
+            <uri>model://obs_cylinder_large</uri>
+            <pose>4.0 -1.5 1.0 0 0 0</pose>
+            </include>
+        </model>
+    
+        <model name='cylinder2_b'>
+            <include>
+            <uri>model://obs_cylinder_large</uri>
+            <pose>4.0 1.5 1.0 0 0 0</pose>
+            </include>
+        </model>
+        <actor name="actor1">
+            <pose>-5 0 1.0 1.5707 0 1.5707</pose>
+            <skin>
+                <filename>moonwalk.dae</filename>
+                <scale>1.0</scale>
+            </skin>
+            <animation name="walking">
+                <filename>walk.dae</filename>
+                <scale>1.000000</scale>
+                <interpolate_x>true</interpolate_x>
+            </animation>
+            <plugin name="actor1_plugin" filename="libcustom_actor_plugin.so">
+                <target>0 -5 1.2138</target>
+                <target_weight>1.15</target_weight>
+                <obstacle_weight>1.8</obstacle_weight>
+                <animation_factor>5.1</animation_factor>
+                <ignore_obstacles>
+                    <model>cafe</model>
+                    <model>ground_plane</model>
+                </ignore_obstacles>
+                <trajectory>
+                    <waypoint>
+                        <time>0.0</time>
+                        <pose>-2 -1</pose>
+                    </waypoint>
+                    <waypoint>
+                        <time>1.0</time>
+                        <pose>-3 4</pose>
+                    </waypoint>
+                    <waypoint>
+                        <time>2.0</time>
+                        <pose>1 1</pose>
+                    </waypoint>
+                    <waypoint>
+                        <time>3.0</time>
+                        <pose>1 -1</pose>
+                    </waypoint>
+                </trajectory>
+                <walking_mode>custom</walking_mode>
+            </plugin>
+        </actor>
+
+        <physics type='ode'>
+            <gravity>0 0 -9.8066</gravity>
+            <ode>
+              <solver>
+                <type>quick</type>
+                <iters>150</iters>
+                <sor>1.3</sor>
+                <use_dynamic_moi_rescaling>0</use_dynamic_moi_rescaling>
+              </solver>
+              <constraints>
+                <cfm>0.00001</cfm>
+                <erp>0.2</erp>
+                <contact_max_correcting_vel>1000</contact_max_correcting_vel>
+                <contact_surface_layer>0.01</contact_surface_layer>
+              </constraints>
+            </ode>
+            <max_step_size>0.004</max_step_size>
+            <real_time_factor>1000.0</real_time_factor>
+            <real_time_update_rate>250</real_time_update_rate>
+            <magnetic_field>6.0e-6 2.3e-5 -4.2e-5</magnetic_field>
+          </physics>
+    </world>
+</sdf>

@@ -425,6 +425,7 @@ namespace ego_planner
     cout << "/uav"<< planner_manager_->pp_.drone_id <<" planner state: " + state_str[int(exec_state_)] << endl;
   }
 
+  //>>>>>>>>>>>>>>>>>核心逻辑<<<<<<<<<<<<<<<<<<<<
   void EGOReplanFSM::execFSMCallback(const ros::TimerEvent &e)
   {
     // 暂停计时

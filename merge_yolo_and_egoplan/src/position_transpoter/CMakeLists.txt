@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(position_translater)
+project(position_transpoter)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -110,11 +110,22 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES my_extend_pkg
-#  CATKIN_DEPENDS geometry_msgs mavros_msgs nav_msgs prometheus_msgs roscpp rospy std_msgs tf tf2_eigen tf2_ros
-#  DEPENDS system_lib
+  INCLUDE_DIRS include
+  LIBRARIES
+  CATKIN_DEPENDS
+  geometry_msgs
+  mavros_msgs
+  nav_msgs
+  prometheus_msgs
+  roscpp
+  rospy
+  std_msgs
+  tf
+  tf2_eigen
+  tf2_ros
+  DEPENDS system_lib
 )
+
 
 ###########
 ## Build ##
@@ -123,10 +134,9 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
-
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/my_extend_pkg.cpp
@@ -140,9 +150,9 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(yolo5_bridge_ego_plan src/yolo5_bridge_ego_plan.cpp)
-add_dependencies(yolo5_bridge_ego_plan ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(yolo5_bridge_ego_plan
+add_executable(position_transpoter src/yolo5_bridge_ego_plan.cpp)
+add_dependencies(position_transpoter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(position_transpoter
   ${catkin_LIBRARIES}
 )
 
@@ -181,19 +191,15 @@ target_link_libraries(yolo5_bridge_ego_plan
 # )
 
 ## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
+install(DIRECTORY include/${PROJECT_NAME}/
+  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+  FILES_MATCHING PATTERN "*.h"
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
-
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)
 #############
 ## Testing ##
 #############

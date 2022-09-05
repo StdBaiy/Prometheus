@@ -2,6 +2,7 @@
 	<node pkg="prometheus_detection" type="yolov5_tensorrt_client.py" name="yolov5_client" output="screen" launch-prefix="gnome-terminal --tab --">
 		<param name="camera_parameters" type="string" value="$(find prometheus_gazebo)/config/camera_config/gimbal_camera.yaml" />
 		<param name="pub_track_topic" type="string" value="/prometheus/object_detection/siamrpn_tracker" />
+		<param name="yaw_rate_pub_topic" type="string" value="/prometheus/object_detection/yaw_rate"/>
 		<param name="uav_id" type="int" value="1" />
 	</node>
 </launch>

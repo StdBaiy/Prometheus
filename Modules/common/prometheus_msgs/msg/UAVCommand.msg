@@ -21,6 +21,7 @@ uint8 XY_VEL_Z_POS_BODY = 5     ### 机体系定高速度控制
 uint8 TRAJECTORY = 6            ### 轨迹追踪控制
 uint8 XYZ_ATT = 7               ### 姿态控制（来自外部控制器）
 uint8 LAT_LON_ALT = 8           ### 绝对坐标系下的经纬度
+uint8 TRAJECTORY_AND_YAW_RATE = 9   ### 机体使用轨迹控制，姿态使用偏航角速度
 
 ## 控制参考量
 float32[3] position_ref                ## [m]

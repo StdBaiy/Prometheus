@@ -34,6 +34,7 @@ add_message_files(
   MultiArucoInfo.msg
   DetectionInfo.msg
   MultiDetectionInfo.msg
+  YawRateInfo.msg
   BoundingBox.msg
   BoundingBoxes.msg
   ObjectCount.msg

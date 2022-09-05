@@ -1,9 +1,11 @@
 #include <ros/ros.h>
+#include<string>
 #include "bspline_opt/uniform_bspline.h"
 #include "nav_msgs/Odometry.h"
 #include "traj_utils/Bspline.h"
 #include "quadrotor_msgs/PositionCommand.h"
 #include <prometheus_msgs/UAVCommand.h>
+#include <prometheus_msgs/YawRateInfo.h>
 #include "std_msgs/Empty.h"
 #include "visualization_msgs/Marker.h"
 
@@ -28,8 +30,11 @@ ros::Time start_time_;
 int traj_id_;
 
 // yaw control
-double last_yaw_, last_yaw_dot_;
+double last_yaw_, last_yaw_dot_, last_yaw_rate_;
 double time_forward_;
+std::string move_mode_, yaw_rate_topic_name_;
+void yawRateCallback(prometheus_msgs::YawRateInfo yr);
+
 
 void pub_prometheus_command(quadrotor_msgs::PositionCommand ego_traj_cmd);
 void bsplineCallback(traj_utils::BsplineConstPtr msg);
@@ -46,10 +51,15 @@ int main(int argc, char **argv)
   nh.param("control_flag", control_flag, 0);
   nh.param("traj_server/time_forward", time_forward_, 1.0);
   nh.param("traj_server/last_yaw", last_yaw_, 0.0);
+  nh.param<std::string>("move_mode_", move_mode_, "TRAJECTORY");
+  nh.param<std::string>("yaw_rate_topic_name_", yaw_rate_topic_name_, "/prometheus/object_detection/yaw_rate");
   string uav_name = "/uav" + std::to_string(uav_id);
 
   // [订阅] EGO规划结果
   ros::Subscriber bspline_sub = nh.subscribe(uav_name +"/planning/bspline", 10, bsplineCallback);
+
+  // [订阅] yaw_rate
+  ros::Subscriber yaw_rate_sub = nh.subscribe<prometheus_msgs::YawRateInfo>(uav_name + yaw_rate_topic_name_, 1, yawRateCallback);
 
   // [发布] EGO规划结果
   pos_cmd_pub = nh.advertise<quadrotor_msgs::PositionCommand>(uav_name + "/position_cmd", 50);
@@ -80,6 +90,9 @@ int main(int argc, char **argv)
   return 0;
 }
 
+
+// 此处是ego发布的command命令，由uav_controller接受之后驱动无人机运行
+// 我们希望能使无人机的yaw由别的节点控制，因此新建了一种控制模式TRAJECTORY_AND_YAW_RATE, 在该模式下，ego command中的yaw_ref将被忽略
 void pub_prometheus_command(quadrotor_msgs::PositionCommand ego_traj_cmd)
 {
   prometheus_msgs::UAVCommand uav_command;
@@ -89,7 +102,14 @@ void pub_prometheus_command(quadrotor_msgs::PositionCommand ego_traj_cmd)
   if (control_flag == 0)
   {
     // pos_controller
-    uav_command.Move_mode = prometheus_msgs::UAVCommand::TRAJECTORY;
+    if(move_mode_ == "TRAJECTORY"){
+      uav_command.Move_mode = prometheus_msgs::UAVCommand::TRAJECTORY;
+    }
+    else if(move_mode_ == "TRAJECTORY_AND_YAW_RATE"){
+      uav_command.Move_mode = prometheus_msgs::UAVCommand::TRAJECTORY_AND_YAW_RATE;
+      uav_command.yaw_rate_ref = last_yaw_rate_;
+      uav_command.Yaw_Rate_Mode = true;
+    }
   }
   else if (control_flag == 1)
   {
@@ -105,8 +125,11 @@ void pub_prometheus_command(quadrotor_msgs::PositionCommand ego_traj_cmd)
   uav_command.acceleration_ref[0] = ego_traj_cmd.acceleration.x;
   uav_command.acceleration_ref[1] = ego_traj_cmd.acceleration.y;
   uav_command.acceleration_ref[2] = ego_traj_cmd.acceleration.z;
-  uav_command.yaw_ref = geometry_utils::normalize_angle(ego_traj_cmd.yaw);
-  // uav_command.yaw_rate_ref         = ego_traj_cmd.yaw_dot;
+
+  /****************本行代码就是实际的无人机航角控制命令******************/
+  /***********为了使无人机在追踪目标时始终对着目标，此处应该被修改************/
+  // uav_command.yaw_ref = geometry_utils::normalize_angle(ego_traj_cmd.yaw);
+
 
   uav_cmd_pub.publish(uav_command);
 }
@@ -215,6 +238,12 @@ void bsplineCallback(traj_utils::BsplineConstPtr msg)
   traj_duration_ = traj_[0].getTimeSum();
 
   receive_traj_ = true;
+}
+
+// 更新本地yaw_rate
+void yawRateCallback(prometheus_msgs::YawRateInfo yr)
+{
+  last_yaw_rate_ = yr.yaw_rate;
 }
 
 std::pair<double, double> calculate_yaw(double t_cur, Eigen::Vector3d &pos, ros::Time &time_now, ros::Time &time_last)

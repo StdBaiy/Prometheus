@@ -335,6 +335,7 @@ Eigen::Vector4d UAV_controller::get_cmd_from_controller()
     desired_state.vel = vel_des;
     desired_state.acc = acc_des;
     desired_state.yaw = yaw_des;
+    //欧拉角转四元数
     desired_state.q = geometry_utils::yaw_to_quaternion(yaw_des);
     // 计算
     if (pos_controller == POS_CONTOLLER::PID)
@@ -529,6 +530,17 @@ void UAV_controller::set_command_des()
             }
             yaw_des = uav_command.yaw_ref;
         }
+        else if (uav_command.Move_mode == prometheus_msgs::UAVCommand::TRAJECTORY_AND_YAW_RATE)
+        {
+            // 【TRAJECTORY】轨迹控制，输入为期望位置、速度、加速度，其中速度和加速度可缺省（降级为定点控制）
+            for (int i = 0; i < 3; i++)
+            {
+                pos_des(i) = uav_command.position_ref[i];
+                vel_des(i) = uav_command.velocity_ref[i];
+                acc_des(i) = uav_command.acceleration_ref[i];
+            }
+            yaw_rate_des = uav_command.yaw_rate_ref;
+        }
         else if (uav_command.Move_mode == prometheus_msgs::UAVCommand::XYZ_ATT)
         {
             // 【XYZ_ATT】姿态直接控制，必须先将enable_external_control设置为true
@@ -604,6 +616,18 @@ void UAV_controller::set_command_des_for_pos_controller()
             }
             yaw_des = uav_command.yaw_ref;
         }
+        else if (uav_command.Move_mode == prometheus_msgs::UAVCommand::TRAJECTORY_AND_YAW_RATE)
+        {
+            // 【TRAJECTORY_AND_YAW_RATE】轨迹控制，输入为期望位置、速度、加速度，其中速度和加速度可缺省（降级为定点控制）
+            //  其中偏航角使用角速度控制
+            for (int i = 0; i < 3; i++)
+            {
+                pos_des(i) = uav_command.position_ref[i];
+                vel_des(i) = uav_command.velocity_ref[i];
+                acc_des(i) = uav_command.acceleration_ref[i];
+            }
+            yaw_rate_des = uav_command.yaw_rate_ref;
+        }
         else
         {
             uav_command.Agent_CMD = prometheus_msgs::UAVCommand::Current_Pos_Hover;
@@ -636,7 +660,6 @@ void UAV_controller::uav_cmd_cb(const prometheus_msgs::UAVCommand::ConstPtr &msg
         uav_command.Agent_CMD = prometheus_msgs::UAVCommand::Init_Pos_Hover;
         return;
     }
-
     uav_command = *msg;
 }
 
@@ -704,6 +727,10 @@ void UAV_controller::send_pos_cmd_to_px4_original_controller()
             else if (uav_command.Move_mode == prometheus_msgs::UAVCommand::TRAJECTORY)
             {
                 send_pos_vel_xyz_setpoint(pos_des, vel_des, yaw_des);
+            }
+            else if (uav_command.Move_mode == prometheus_msgs::UAVCommand::TRAJECTORY_AND_YAW_RATE)
+            {
+                send_pos_vel_xyz_setpoint_and_yaw_rate(pos_des, vel_des, yaw_rate_des);
             }
             else if (uav_command.Move_mode == prometheus_msgs::UAVCommand::XYZ_ATT)
             {
@@ -995,6 +1022,24 @@ void UAV_controller::send_pos_vel_xyz_setpoint(const Eigen::Vector3d &pos_sp, co
     px4_setpoint_raw_local_pub.publish(pos_setpoint);
 }
 
+// 基本和send_pos_vel_xyz_setpoint一样，区别在于yaw是通过速度控制而非指定具体角度
+void UAV_controller::send_pos_vel_xyz_setpoint_and_yaw_rate(const Eigen::Vector3d &pos_sp, const Eigen::Vector3d &vel_sp, float yaw_rate)
+{
+    mavros_msgs::PositionTarget pos_setpoint;
+    // 速度作为前馈项， 参见FlightTaskOffboard.cpp
+    // 控制方法请见 PositionControl.cpp
+    pos_setpoint.type_mask = 0b010111000000; // 100 111 000 000  vx vy　vz x y z+ yaw_rate
+    pos_setpoint.coordinate_frame = 1;
+    pos_setpoint.position.x = pos_sp[0];
+    pos_setpoint.position.y = pos_sp[1];
+    pos_setpoint.position.z = pos_sp[2];
+    pos_setpoint.velocity.x = vel_sp[0];
+    pos_setpoint.velocity.y = vel_sp[1];
+    pos_setpoint.velocity.z = vel_sp[2];
+    pos_setpoint.yaw_rate = yaw_rate;
+    px4_setpoint_raw_local_pub.publish(pos_setpoint);
+}
+
 //发送加速度期望值至飞控（输入: 期望axayaz,期望yaw）
 void UAV_controller::send_acc_xyz_setpoint(const Eigen::Vector3d &accel_sp, float yaw_sp)
 {
@@ -1166,6 +1211,13 @@ void UAV_controller::printf_control_state()
                 cout << GREEN << "Pos_ref [X Y Z] : " << uav_command.position_ref[0] << " [ m ] " << uav_command.position_ref[1] << " [ m ] " << uav_command.position_ref[2] << " [ m ] " << TAIL << endl;
                 cout << GREEN << "Vel_ref [X Y Z] : " << uav_command.velocity_ref[0] << " [m/s] " << uav_command.velocity_ref[1] << " [m/s] " << uav_command.velocity_ref[2] << " [m/s] " << TAIL << endl;
                 cout << GREEN << "Yaw_ref : " << uav_command.yaw_ref * 180 / M_PI << " [deg] " << TAIL << endl;
+            }
+            else if (uav_command.Move_mode == prometheus_msgs::UAVCommand::TRAJECTORY_AND_YAW_RATE)
+            {
+                cout << GREEN << "Command: [ Move in TRAJECTORY_AND_YAW_RATE ] " << TAIL << endl;
+                cout << GREEN << "Pos_ref [X Y Z] : " << uav_command.position_ref[0] << " [ m ] " << uav_command.position_ref[1] << " [ m ] " << uav_command.position_ref[2] << " [ m ] " << TAIL << endl;
+                cout << GREEN << "Vel_ref [X Y Z] : " << uav_command.velocity_ref[0] << " [m/s] " << uav_command.velocity_ref[1] << " [m/s] " << uav_command.velocity_ref[2] << " [m/s] " << TAIL << endl;
+                cout << GREEN << "Yaw_Rate_ref : " << uav_command.yaw_rate_ref * 180 / M_PI << " [deg] " << TAIL << endl;
             }
             else if (uav_command.Move_mode == prometheus_msgs::UAVCommand::XYZ_POS_BODY)
             {

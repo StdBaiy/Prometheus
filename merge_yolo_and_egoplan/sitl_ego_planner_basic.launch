@@ -64,6 +64,11 @@
       <param name="control_flag" value="0"/>
       <param name="traj_server/time_forward" value="1.0"/>
       <param name="traj_server/last_yaw" value="$(arg yaw_init)"/>
+      
+      <!-- 当使用TRAJECTORY_AND_YAW_RATE时，相当于ego放弃对yaw的控制，交给别的节点完成 -->
+      <!-- move_mode_的默认值为TRAJECTORY -->
+      <param name="move_mode_" value="TRAJECTORY_AND_YAW_RATE"/>
+      <param name="yaw_rate_topic_name_" value="/prometheus/object_detection/yaw_rate"/>
     </node>
   
   </launch>

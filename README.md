@@ -20,6 +20,10 @@
 - 修改了部分sdf和world文件内容（在我的机子上无法通过include直接引用sdf的话题，推测为gazebo的问题）
 - 添加了若干用于调试的脚本
 - 训练了自己的yolov5模型
+***
+- 结合了追踪和避障模块，整合了启动脚本于merge_yolo_and_egoplan/
+- 修改了ego的状态机，使之能边规划边飞行
+- 修改了traj_server_for_prometheus.cpp的pub_prometheus_command函数，使飞机的姿态角始终对准目标
 
 
 ## 项目总览
